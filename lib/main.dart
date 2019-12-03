@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //JSON Data Retrieved
   
   void getData(){
-	print("Retrieving Data");
+	showSnackBar("Retrieving Data");
 	String url = "https://api.data.gov.sg/v1/environment/air-temperature?date="+_date;//2019-12-03"
 	_makeGetRequest(url);
   }
@@ -65,17 +65,39 @@ class _MyHomePageState extends State<MyHomePage> {
 	
 	print(retrievedData['metadata']['stations'][0]['name']);
   }
-   void showInSnackBar(String value) {
-    //Scaffold.of(context).showSnackBar(new SnackBar(
-    //    content: new Text(value)
-    //));
+  
+  BuildContext _scaffoldContext;
+  void showSnackBar(String val) {
+	  print(val);
+    Scaffold.of(_scaffoldContext).showSnackBar(new SnackBar(
+      content: new Text(val),
+      duration: new Duration(seconds: 5),
+    ));
   }
   
-
   @override
   Widget build(BuildContext context) {
+	  //https://stackoverflow.com/questions/51304568/scaffold-of-called-with-a-context-that-does-not-contain-a-scaffold
 	  //Widget DateChanger = Text("DateChanger Placeholder");
-	  Widget DateChanger = RaisedButton(
+	//Widget DateChanger = 
+	final _scaffoldKey = GlobalKey<ScaffoldState>();
+    return Scaffold(
+		key: _scaffoldKey, 
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body:  new Builder(builder: (BuildContext context) { _scaffoldContext = context;
+			return Container(padding: const EdgeInsets.all(8),
+			child:Column(
+			crossAxisAlignment: CrossAxisAlignment.start,
+		  children: <Widget>[
+			Container(
+				padding: const EdgeInsets.all(8),
+				child: Text('Stations', 
+					textAlign: TextAlign.left,style:TextStyle(fontSize: 20,)),
+			),
+			//////////////////////////////////////////
+			RaisedButton(
 		shape: RoundedRectangleBorder(
 			borderRadius: BorderRadius.circular(5.0)),
 		elevation: 4.0,
@@ -88,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
 			//_date = '${date.year}-${date.month}-${date.day}';//
 			_date = DateFormat('yyyy-MM-dd').format(date);
 			setState(() {});
-			getData();showInSnackBar("Loading");
+			getData();
 		  }, currentTime: DateTime.now(), locale: LocaleType.en);
 		},
 		child: Container(
@@ -130,21 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
 		  ),
 		),
 		color: Colors.white,
-	  ); 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Container(padding: const EdgeInsets.all(8),
-			child:Column(
-			crossAxisAlignment: CrossAxisAlignment.start,
-		  children: <Widget>[
-			Container(
-				padding: const EdgeInsets.all(8),
-				child: Text('Stations', 
-					textAlign: TextAlign.left,style:TextStyle(fontSize: 20,)),
-			),
-			DateChanger,
+	  ),
 			//////////////////////////////////////////
 			Container(
 				height: MediaQuery.of(context).size.height-200,
@@ -171,7 +179,8 @@ class _MyHomePageState extends State<MyHomePage> {
 				)
 			)
 			/////////////////////////////////////////////
-		],))
+	  ],));
+	  }),
 	);
   }
 }

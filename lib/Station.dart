@@ -13,6 +13,7 @@ class Station extends StatefulWidget {
   @override
   StationState createState() => StationState();
 }
+
 class StationState extends State<Station>{
   	final List<String> entries = <String>['A', 'B', 'C'];
 	final List<int> colorCodes = <int>[600, 500, 100];
@@ -23,27 +24,31 @@ class StationState extends State<Station>{
 	int noRead=0;
 	List<String> _timings;
 	List<String> _readings;
-	List<DateTime> _rawTimings;
-  @override
+	List<int> _shown;
+	List<TemperatureValue> _graphData;
 	
-	void initState(){values();}
-	void values(){
+	void initState(){ogvalues();}
+	void ogvalues(){
 		setState(() {
 			_name = widget.data['metadata']['stations'][widget.index]['name'];
 			_la=widget.data['metadata']['stations'][widget.index]['location']['latitude'];
 			_lg=widget.data['metadata']['stations'][widget.index]['location']['longitude'];
 			_id = widget.data['metadata']['stations'][widget.index]['id'];
 			
+			_shown = new List<int>();
 			_timings = new List<String>();
 			_readings = new List<String>();
+			_graphData = List<TemperatureValue>();
 			noRead = 0;
+			var counter = 0;
 			for (var i=widget.data['items'].length-1;i>=0;--i){
 				var item = widget.data['items'][i];
 				String timestamp = item['timestamp'];
+				
 				DateTime timing = DateFormat("yyyy-MM-ddTHH:mm:ss").parse(timestamp.substring(0,19));
 				if (!displaymode){timestamp = DateFormat('hh:mm a').format(timing);}
 				else{timestamp = DateFormat('HH:mm').format(timing);}
-				//dateTimeFromString(timestamp.substring(0,19), "yyyy-MM-ddTHH:mm:ss")
+				
 				String temp = "";
 				for (var read in item['readings']){
 					if (read['station_id'] == _id){temp = read['value'].toString();}
@@ -51,12 +56,31 @@ class StationState extends State<Station>{
 				if (temp != ""){
 					_timings.add(timestamp);
 					_readings.add(temp);
+					_graphData.add(new TemperatureValue(timing, double.parse(temp)));
+					_shown.add(counter);counter++;
 					noRead++;
 				}
 			}
 		});
 	}
+  ///////////////////////////////////////////////////////////////////
+  
+  ////////////////////////////////////////////////////////////////////////
+  @override
   Widget build(BuildContext context){
+	var seriesList = [
+      new charts.Series<TemperatureValue, DateTime>(
+        id: 'Temperature',
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (TemperatureValue v , _) => v.time,
+        measureFn: (TemperatureValue v, _) => v.temp,
+        data: _graphData,
+      )
+    ];
+	Widget chart = new charts.TimeSeriesChart(
+      seriesList,
+      animate: false,
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text("$_name"),
@@ -67,22 +91,21 @@ class StationState extends State<Station>{
 		  children: <Widget>[
 			Container(
 				padding: const EdgeInsets.all(8),
-				child: Text('Latitude: ${_la}', 
-					textAlign: TextAlign.left,style:TextStyle(fontSize: 20,)),
-			),
-			Container(
-				padding: const EdgeInsets.all(8),
-				child: Text('Longitude: ${_lg}', 
-					textAlign: TextAlign.left,style:TextStyle(fontSize: 20,)),
+				child: Text('Latitude: ${_la}, Longitude: ${_lg}', 
+					textAlign: TextAlign.left,style:TextStyle(fontSize: 15,)),
 			),
 			Container(
 				padding: const EdgeInsets.all(8),
 				child: Text('ID: ${_id}, Date: ${widget.date}', 
-				textAlign: TextAlign.left,style:TextStyle(fontSize: 18,)),
+				textAlign: TextAlign.left,style:TextStyle(fontSize: 15,)),
+			),
+			Container(
+				height: MediaQuery.of(context).size.height/3 ,
+				child:chart,
 			),
 			////////////////////////////////////////////
 			Container(
-				height: MediaQuery.of(context).size.height - 250,
+				height: MediaQuery.of(context).size.height/2 - 100 ,
 				child: ListView.builder(
 				  //padding: const EdgeInsets.all(8),
 				  itemCount: noRead,
@@ -103,10 +126,15 @@ class StationState extends State<Station>{
 				)
 			)
 			/////////////////////////////////////////////
+			
 		],))
 	);
   }
 
+}
 
-
+class TemperatureValue{
+	double temp;
+	DateTime time;
+  TemperatureValue(this.time,this.temp);
 }
