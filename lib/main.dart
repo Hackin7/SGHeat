@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //JSON Data Retrieved
   
   void getData(){
-	showSnackBar("Retrieving Data");
+	notify("Retrieving Data");
 	String url = "https://api.data.gov.sg/v1/environment/air-temperature?date="+_date;//2019-12-03"
 	_makeGetRequest(url);
   }
@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   
   BuildContext _scaffoldContext;
-  void showSnackBar(String val) {
+  void notify(String val) {
 	  print(val);
     Scaffold.of(_scaffoldContext).showSnackBar(new SnackBar(
       content: new Text(val),
@@ -80,10 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
 	  //https://stackoverflow.com/questions/51304568/scaffold-of-called-with-a-context-that-does-not-contain-a-scaffold
 	  //Widget DateChanger = Text("DateChanger Placeholder");
 	//Widget DateChanger = 
-	final _scaffoldKey = GlobalKey<ScaffoldState>();
-    return Scaffold(
-		key: _scaffoldKey, 
-      appBar: AppBar(
+	return Scaffold(
+	  appBar: AppBar(
         title: Text(widget.title),
       ),
       body:  new Builder(builder: (BuildContext context) { _scaffoldContext = context;
@@ -111,6 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
 			_date = DateFormat('yyyy-MM-dd').format(date);
 			setState(() {});
 			getData();
+			/*
+			Scaffold.of(context).showSnackBar(new SnackBar(
+			  content: new Text("Loading"),
+			  duration: new Duration(seconds: 5),
+			));*/
 		  }, currentTime: DateTime.now(), locale: LocaleType.en);
 		},
 		child: Container(
@@ -181,6 +184,6 @@ class _MyHomePageState extends State<MyHomePage> {
 			/////////////////////////////////////////////
 	  ],));
 	  }),
-	);
+	  );
   }
 }
