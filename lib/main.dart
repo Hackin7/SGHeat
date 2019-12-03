@@ -41,17 +41,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   _makeGetRequest(String url) async{
 	  // make GET request
-	  Response response = await get(url);
-	  // sample info available in response
-	  int statusCode = response.statusCode;
-	  Map<String, String> headers = response.headers;
-	  String contentType = headers['content-type'];
-	  String jsonString = response.body;
-	  print(jsonString);
-	  if (statusCode!=200){}
-	  // convert json to object...
-	  retrievedData = jsonDecode(jsonString);
-	  updateData();
+	  try{
+		  Response response = await get(url);
+		  // sample info available in response
+		  
+		  int statusCode = response.statusCode;
+		  if (statusCode!=200){notify("Failed to retrieve data. Try selecting the date again.");return;}
+		  Map<String, String> headers = response.headers;
+		  String contentType = headers['content-type'];
+		  String jsonString = response.body;
+		  print(jsonString);
+		  
+		  // convert json to object...
+		  retrievedData = jsonDecode(jsonString);
+		  updateData();
+		  notify("Loaded");
+	  }on Exception{
+		  notify("Failed to retrieve data. Try selecting the date again.");
+	  }
 	}
   void updateData(){
 	setState(() {
