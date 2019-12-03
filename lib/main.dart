@@ -28,7 +28,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _date = DateFormat('yyyy-MM-dd').format(DateTime.now()); //"Not Set";
+  String _date = "Not Set";//DateFormat('yyyy-MM-dd').format(DateTime.now()); //"Not Set";
   Map<String, dynamic> retrievedData;
   List<String> _stationsList = new List<String>();
   int _noStations=0;
